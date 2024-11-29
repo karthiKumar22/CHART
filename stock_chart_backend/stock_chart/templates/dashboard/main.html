@@ -5,22 +5,14 @@
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-      crossorigin="anonymous"
     />
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
-      integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
     <!-- Amcharts -->
     <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
     <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
     <script src="https://cdn.amcharts.com/lib/5/stock.js"></script>
     <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-    <title>Nse Dashboard</title>
-
-    <!-- Styles -->
+    <title>Stock Analysis Dashboard</title>
     <style>
       #chartcontrols {
         height: auto;
@@ -28,7 +20,6 @@
         max-width: 100%;
         background-color: white;
       }
-
       #chartdiv {
         display: flex;
         justify-content: flex-start;
@@ -37,14 +28,12 @@
         max-width: 100%;
         background-color: white;
       }
-
       .header div {
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-direction: row;
       }
-
       body {
         background-color: white;
       }
@@ -57,6 +46,7 @@
       style="border-radius: 15px; background-color: #24146c"
     >
       <div class="row shadow-lg p-2" style="border-radius: 15px">
+        <!-- Sidebar with ticker list -->
         <div
           class="col-3 p-3 overflow-y-scroll shadow-lg bg-dark"
           style="
@@ -80,6 +70,7 @@
           {% endfor %}
         </div>
 
+        <!-- Main content area -->
         <div
           class="col-9 text-light overflow-y-scroll"
           style="max-height: 100vh"
@@ -92,7 +83,8 @@
             <div>
               <p><span style="color: cyan">Industry:</span> {{ industry }}</p>
               <p>
-                <span style="color: rgb(225, 0, 255)">Sector:</span> {{ sector }}
+                <span style="color: rgb(225, 0, 255)">Sector:</span> {{ sector
+                }}
               </p>
             </div>
           </div>
@@ -102,27 +94,17 @@
 
           <script>
             am5.ready(function () {
-              // Create root element
               var root = am5.Root.new("chartdiv");
+              root.setThemes([am5themes_Animated.new(root)]);
 
-              const myTheme = am5.Theme.new(root);
-              myTheme.rule("Grid", ["scrollbar", "minor"]).setAll({
-                visible: false,
-              });
-
-              root.setThemes([am5themes_Animated.new(root), myTheme]);
-
-              // Create a stock chart
               var stockChart = root.container.children.push(
                 am5stock.StockChart.new(root, {
                   paddingRight: 0,
                 })
               );
 
-              // Set global number format
               root.numberFormatter.set("numberFormat", "#,###.00");
 
-              // Create a main stock panel (chart)
               var mainPanel = stockChart.panels.push(
                 am5stock.StockPanel.new(root, {
                   wheelY: "zoomX",
@@ -131,7 +113,6 @@
                 })
               );
 
-              // Create axes
               var valueAxis = mainPanel.yAxes.push(
                 am5xy.ValueAxis.new(root, {
                   renderer: am5xy.AxisRendererY.new(root, { pan: "zoom" }),
@@ -146,14 +127,12 @@
                 am5xy.GaplessDateAxis.new(root, {
                   baseInterval: { timeUnit: "minute", count: 1 },
                   renderer: am5xy.AxisRendererX.new(root, {
-                    pan: "zoom",
                     minorGridEnabled: true,
                   }),
                   tooltip: am5.Tooltip.new(root, {}),
                 })
               );
 
-              // Add series
               var valueSeries = mainPanel.series.push(
                 am5xy.CandlestickSeries.new(root, {
                   name: "Stock Data",
@@ -171,18 +150,18 @@
                 })
               );
 
-              // Set main value series
               stockChart.set("stockSeries", valueSeries);
 
-              // Add a stock legend
               var valueLegend = mainPanel.plotContainer.children.push(
                 am5stock.StockLegend.new(root, {
                   stockChart: stockChart,
                 })
               );
 
-              // Create volume axis
-              var volumeAxisRenderer = am5xy.AxisRendererY.new(root, {});
+              // Add volume series
+              var volumeAxisRenderer = am5xy.AxisRendererY.new(root, {
+                inside: true,
+              });
               volumeAxisRenderer.labels.template.set("forceHidden", true);
               volumeAxisRenderer.grid.template.set("forceHidden", true);
 
@@ -196,7 +175,6 @@
                 })
               );
 
-              // Add volume series
               var volumeSeries = mainPanel.series.push(
                 am5xy.ColumnSeries.new(root, {
                   name: "Volume",
@@ -214,7 +192,6 @@
                 fillOpacity: 0.5,
               });
 
-              // Set main series
               stockChart.set("volumeSeries", volumeSeries);
               valueLegend.data.setAll([valueSeries, volumeSeries]);
 
@@ -242,9 +219,7 @@
               var sbDateAxis = scrollbar.chart.xAxes.push(
                 am5xy.GaplessDateAxis.new(root, {
                   baseInterval: { timeUnit: "minute", count: 1 },
-                  renderer: am5xy.AxisRendererX.new(root, {
-                    minorGridEnabled: true,
-                  }),
+                  renderer: am5xy.AxisRendererX.new(root, {}),
                 })
               );
 
@@ -268,15 +243,12 @@
                 fillOpacity: 0.3,
               });
 
-              // Set up series type switcher
               var seriesSwitcher = am5stock.SeriesTypeControl.new(root, {
                 stockChart: stockChart,
               });
-
               seriesSwitcher.events.on("selected", function (ev) {
                 setSeriesType(ev.item.id);
               });
-
               function getNewSettings(series) {
                 var newSettings = [];
                 am5.array.each(
@@ -300,13 +272,11 @@
                 );
                 return newSettings;
               }
-
               function setSeriesType(seriesType) {
                 var currentSeries = stockChart.get("stockSeries");
                 var newSettings = getNewSettings(currentSeries);
                 var data = currentSeries.data.values;
                 mainPanel.series.removeValue(currentSeries);
-
                 var series;
                 switch (seriesType) {
                   case "line":
@@ -331,7 +301,6 @@
                     );
                     break;
                 }
-
                 if (series) {
                   valueLegend.data.removeValue(currentSeries);
                   series.data.setAll(data);
@@ -344,16 +313,187 @@
                 }
               }
 
-              // Set up toolbar
+              // Set up interval control with proper formatting
+              var defaultInterval = "1d"; // Set default interval to 1 day
+              var intervalControl = am5stock.IntervalControl.new(root, {
+                stockChart: stockChart,
+                currentItem: defaultInterval, // Set the default interval
+                intervals: [
+                  {
+                    id: "1m",
+                    label: "1m",
+                    interval: { timeUnit: "minute", count: 1 },
+                  },
+                  {
+                    id: "2m",
+                    label: "2m",
+                    interval: { timeUnit: "minute", count: 2 },
+                  },
+                  {
+                    id: "5m",
+                    label: "5m",
+                    interval: { timeUnit: "minute", count: 5 },
+                  },
+                  {
+                    id: "15m",
+                    label: "15m",
+                    interval: { timeUnit: "minute", count: 15 },
+                  },
+                  {
+                    id: "30m",
+                    label: "30m",
+                    interval: { timeUnit: "minute", count: 30 },
+                  },
+                  {
+                    id: "60m",
+                    label: "1h",
+                    interval: { timeUnit: "hour", count: 1 },
+                  },
+                  {
+                    id: "1d",
+                    label: "1d",
+                    interval: { timeUnit: "day", count: 1 },
+                  },
+                  {
+                    id: "5d",
+                    label: "5d",
+                    interval: { timeUnit: "day", count: 5 },
+                  },
+                  {
+                    id: "1wk",
+                    label: "1w",
+                    interval: { timeUnit: "week", count: 1 },
+                  },
+                  {
+                    id: "1mo",
+                    label: "1M",
+                    interval: { timeUnit: "month", count: 1 },
+                  },
+                ],
+              });
+
+              // Fetch initial data for the default interval
+              fetch(
+                `/update_data/${encodeURIComponent(
+                  "{{ ticker }}"
+                )}/${encodeURIComponent(defaultInterval)}/`
+              )
+                .then((response) => {
+                  if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                  }
+                  return response.json();
+                })
+                .then((data) => {
+                  // Process data and update chart
+                  if (data && data.length > 0) {
+                    var updatedData = data.map(function (item) {
+                      return {
+                        Date: new Date(item.Datetime).getTime(),
+                        Open: item.Open,
+                        High: item.High,
+                        Low: item.Low,
+                        Close: item.Close,
+                        Volume: item.Volume,
+                      };
+                    });
+
+                    // Update series data
+                    valueSeries.data.setAll(updatedData);
+                    volumeSeries.data.setAll(updatedData);
+                    sbSeries.data.setAll(updatedData);
+
+                    // Zoom to the last 30 data points
+                    var lastIndex = updatedData.length - 1;
+                    var startIndex = Math.max(0, lastIndex - 29);
+                    var startDate = updatedData[startIndex].Date;
+                    var endDate = updatedData[lastIndex].Date;
+                    dateAxis.zoomToDates(
+                      new Date(startDate),
+                      new Date(endDate)
+                    );
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error fetching initial data:", error);
+                });
+
+              // Set up data updating on interval change
+              intervalControl.events.on("selected", function (ev) {
+                var interval = ev.item.id;
+
+                // Update x-axis base interval
+                var timeUnit = ev.item.interval.timeUnit;
+                var count = ev.item.interval.count;
+
+                dateAxis.set("baseInterval", {
+                  timeUnit: timeUnit,
+                  count: count,
+                });
+
+                // Fetch updated data
+                fetch(
+                  `/update_data/${encodeURIComponent(
+                    "{{ ticker }}"
+                  )}/${encodeURIComponent(interval)}/`
+                )
+                  .then((response) => {
+                    if (!response.ok) {
+                      throw new Error("Network response was not ok");
+                    }
+                    return response.json();
+                  })
+                  .then((data) => {
+                    if (data && data.length > 0) {
+                      var updatedData = data.map(function (item) {
+                        return {
+                          Date: new Date(item.Datetime).getTime(),
+                          Open: item.Open,
+                          High: item.High,
+                          Low: item.Low,
+                          Close: item.Close,
+                          Volume: item.Volume,
+                        };
+                      });
+
+                      // Update series data
+                      valueSeries.data.setAll(updatedData);
+                      volumeSeries.data.setAll(updatedData);
+                      sbSeries.data.setAll(updatedData);
+
+                      // Zoom to the last 30 data points
+                      var lastIndex = updatedData.length - 1;
+                      var startIndex = Math.max(0, lastIndex - 29);
+                      var startDate = updatedData[startIndex].Date;
+                      var endDate = updatedData[lastIndex].Date;
+                      dateAxis.zoomToDates(
+                        new Date(startDate),
+                        new Date(endDate)
+                      );
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error fetching data:", error);
+                  });
+              });
+
+              // Add toolbar
               var toolbar = am5stock.StockToolbar.new(root, {
                 container: document.getElementById("chartcontrols"),
                 stockChart: stockChart,
                 controls: [
+                  intervalControl,
                   am5stock.IndicatorControl.new(root, {
                     stockChart: stockChart,
                     legend: valueLegend,
                   }),
                   seriesSwitcher,
+                  am5stock.SeriesTypeControl.new(root, {
+                    stockChart: stockChart,
+                  }),
+                  am5stock.DrawingControl.new(root, {
+                    stockChart: stockChart,
+                  }),
                   am5stock.ResetControl.new(root, {
                     stockChart: stockChart,
                   }),
@@ -363,18 +503,19 @@
                 ],
               });
 
-              // Load data dynamically from yfinance
-              var rawData = JSON.parse("{{ hist_data|escapejs }}");
-              var transformedData = rawData.map((item) => ({
-                Date: new Date(item.Datetime).getTime(),
-                Open: item.Open,
-                High: item.High,
-                Low: item.Low,
-                Close: item.Close,
-                Volume: item.Volume,
-              }));
+              // Load initial data
+              var initialData = JSON.parse("{{ hist_data|escapejs }}");
+              var transformedData = initialData.map(function (item) {
+                return {
+                  Date: new Date(item.Datetime).getTime(),
+                  Open: item.Open,
+                  High: item.High,
+                  Low: item.Low,
+                  Close: item.Close,
+                  Volume: item.Volume,
+                };
+              });
 
-              // Set data to all series
               valueSeries.data.setAll(transformedData);
               volumeSeries.data.setAll(transformedData);
               sbSeries.data.setAll(transformedData);
