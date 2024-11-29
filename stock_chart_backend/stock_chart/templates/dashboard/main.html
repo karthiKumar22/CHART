@@ -24,7 +24,7 @@
         display: flex;
         justify-content: flex-start;
         width: 100%;
-        height: 300px;
+        height: 400px;
         max-width: 100%;
         background-color: white;
       }
@@ -51,7 +51,7 @@
           class="col-3 p-3 overflow-y-scroll shadow-lg bg-dark"
           style="
             border-radius: 15px;
-            max-height: 95vh;
+            max-height: 100\vh;
             background: linear-gradient(
               132deg,
               rgb(244, 4, 4) 0%,
@@ -61,20 +61,17 @@
           "
         >
           <h4 class="fw-bold text-center">Analyze Ticker</h4>
-          {% for tkr, name in tickers %}
+          {% for tkr, name in tickers%}
           <a href="{% url 'stock_chart:display_ticker' tkr %}">
             <div class="card mb-2 shadow-lg bg-dark-subtle">
-              <div class="card-body fw-bold">{{ name }} ({{ tkr }})</div>
+              <div class="card-body fw-bold">({{ tkr }})</div>
             </div>
           </a>
           {% endfor %}
         </div>
 
         <!-- Main content area -->
-        <div
-          class="col-9 text-light overflow-y-scroll"
-          style="max-height: 100vh"
-        >
+        <div class="col-9 text-light" style="max-height: 100vh">
           <h1 class="text-center">Stock Analysis Dashboard</h1>
 
           <!-- Company Information -->
@@ -83,8 +80,7 @@
             <div>
               <p><span style="color: cyan">Industry:</span> {{ industry }}</p>
               <p>
-                <span style="color: rgb(225, 0, 255)">Sector:</span> {{ sector
-                }}
+                <span style="color: rgb(225, 0, 255)">Sector:</span> {{ sector }}
               </p>
             </div>
           </div>
@@ -95,7 +91,11 @@
           <script>
             am5.ready(function () {
               var root = am5.Root.new("chartdiv");
-              root.setThemes([am5themes_Animated.new(root)]);
+              const myTheme = am5.Theme.new(root);
+              myTheme.rule("Grid", ["scrollbar", "minor"]).setAll({
+                visible: false,
+              });
+              root.setThemes([am5themes_Animated.new(root), myTheme]);
 
               var stockChart = root.container.children.push(
                 am5stock.StockChart.new(root, {
@@ -123,13 +123,38 @@
                 })
               );
 
+              // Improved date axis configuration
               var dateAxis = mainPanel.xAxes.push(
                 am5xy.GaplessDateAxis.new(root, {
+                  groupData: true,
                   baseInterval: { timeUnit: "minute", count: 1 },
                   renderer: am5xy.AxisRendererX.new(root, {
+                    minGridDistance: 50,
+                    cellStartLocation: 0.1,
+                    cellEndLocation: 0.9,
                     minorGridEnabled: true,
                   }),
                   tooltip: am5.Tooltip.new(root, {}),
+                  dateFormats: {
+                    millisecond: "mm:ss",
+                    second: "HH:mm:ss",
+                    minute: "HH:mm",
+                    hour: "HH:mm",
+                    day: "MMM dd",
+                    week: "MMM dd",
+                    month: "MMM yyyy",
+                    year: "yyyy",
+                  },
+                  periodChangeDateFormats: {
+                    millisecond: "HH:mm:ss",
+                    second: "HH:mm:ss",
+                    minute: "HH:mm",
+                    hour: "HH:mm",
+                    day: "MMM dd",
+                    week: "MMM dd",
+                    month: "MMM yyyy",
+                    year: "yyyy",
+                  },
                 })
               );
 
@@ -158,7 +183,7 @@
                 })
               );
 
-              // Add volume series
+              // Volume axis configuration
               var volumeAxisRenderer = am5xy.AxisRendererY.new(root, {
                 inside: true,
               });
@@ -195,7 +220,7 @@
               stockChart.set("volumeSeries", volumeSeries);
               valueLegend.data.setAll([valueSeries, volumeSeries]);
 
-              // Add cursor
+              // Cursor configuration
               mainPanel.set(
                 "cursor",
                 am5xy.XYCursor.new(root, {
@@ -206,7 +231,7 @@
                 })
               );
 
-              // Add scrollbar
+              // Scrollbar configuration
               var scrollbar = mainPanel.set(
                 "scrollbarX",
                 am5xy.XYChartScrollbar.new(root, {
@@ -219,7 +244,11 @@
               var sbDateAxis = scrollbar.chart.xAxes.push(
                 am5xy.GaplessDateAxis.new(root, {
                   baseInterval: { timeUnit: "minute", count: 1 },
-                  renderer: am5xy.AxisRendererX.new(root, {}),
+                  renderer: am5xy.AxisRendererX.new(root, {
+                    minGridDistance: 50,
+                    cellStartLocation: 0.1,
+                    cellEndLocation: 0.9,
+                  }),
                 })
               );
 
@@ -243,6 +272,219 @@
                 fillOpacity: 0.3,
               });
 
+              // Improved interval control configuration
+              var defaultInterval = "1d";
+              var intervalControl = am5stock.IntervalControl.new(root, {
+                stockChart: stockChart,
+                currentItem: defaultInterval,
+                intervals: [
+                  {
+                    id: "1m",
+                    label: "1m",
+                    interval: { timeUnit: "minute", count: 1 },
+                  },
+                  {
+                    id: "2m",
+                    label: "2m",
+                    interval: { timeUnit: "minute", count: 2 },
+                  },
+                  {
+                    id: "5m",
+                    label: "5m",
+                    interval: { timeUnit: "minute", count: 5 },
+                  },
+                  {
+                    id: "15m",
+                    label: "15m",
+                    interval: { timeUnit: "minute", count: 15 },
+                  },
+                  {
+                    id: "30m",
+                    label: "30m",
+                    interval: { timeUnit: "minute", count: 30 },
+                  },
+                  {
+                    id: "60m",
+                    label: "1h",
+                    interval: { timeUnit: "hour", count: 1 },
+                  },
+                  {
+                    id: "1d",
+                    label: "1d",
+                    interval: { timeUnit: "day", count: 1 },
+                  },
+                  {
+                    id: "5d",
+                    label: "5d",
+                    interval: { timeUnit: "day", count: 5 },
+                  },
+                  {
+                    id: "1wk",
+                    label: "1wk",
+                    interval: { timeUnit: "week", count: 1 },
+                  },
+                  {
+                    id: "1mo",
+                    label: "1mo",
+                    interval: { timeUnit: "month", count: 1 },
+                  },
+                ],
+              });
+
+              function fetchData(interval) {
+                interval = interval.replace(/\s+/g, "");
+                return fetch(
+                  `/update_data/${encodeURIComponent(
+                    "{{ ticker }}"
+                  )}/${interval}/`
+                )
+                  .then((response) => {
+                    if (!response.ok) {
+                      throw new Error("Network response was not ok");
+                    }
+                    return response.json();
+                  })
+                  .then((data) => {
+                    if (data && data.length > 0) {
+                      return data.map(function (item) {
+                        return {
+                          Date: new Date(item.Datetime).getTime(),
+                          Open: item.Open,
+                          High: item.High,
+                          Low: item.Low,
+                          Close: item.Close,
+                          Volume: item.Volume,
+                        };
+                      });
+                    }
+                    return [];
+                  });
+              }
+
+              // Improved chart update function with dynamic axis configuration
+              function updateChart(updatedData, interval) {
+                valueSeries.data.setAll(updatedData);
+                volumeSeries.data.setAll(updatedData);
+                sbSeries.data.setAll(updatedData);
+
+                // Configure axis based on interval
+                var axisConfig = getAxisConfig(interval);
+                dateAxis.set("baseInterval", axisConfig.baseInterval);
+                dateAxis.set("groupInterval", axisConfig.groupInterval);
+                dateAxis.set("groupCount", axisConfig.groupCount);
+                dateAxis.set("dateFormats", axisConfig.dateFormats);
+                dateAxis.set(
+                  "periodChangeDateFormats",
+                  axisConfig.periodChangeDateFormats
+                );
+
+                // Auto-zoom to show appropriate range
+                var lastIndex = updatedData.length - 1;
+                var startIndex = Math.max(
+                  0,
+                  lastIndex - axisConfig.visiblePoints
+                );
+                var startDate = updatedData[startIndex].Date;
+                var endDate = updatedData[lastIndex].Date;
+                dateAxis.zoomToDates(new Date(startDate), new Date(endDate));
+              }
+
+              // Helper function to get axis configuration based on interval
+              function getAxisConfig(interval) {
+                var config = {
+                  baseInterval: { timeUnit: "minute", count: 1 },
+                  groupInterval: { timeUnit: "minute", count: 1 },
+                  groupCount: 200,
+                  visiblePoints: 30,
+                  dateFormats: {
+                    minute: "HH:mm",
+                    hour: "HH:mm",
+                    day: "MMM dd",
+                    week: "MMM dd",
+                    month: "MMM yyyy",
+                  },
+                  periodChangeDateFormats: {
+                    minute: "HH:mm",
+                    hour: "HH:mm",
+                    day: "MMM dd",
+                    week: "MMM dd",
+                    month: "MMM yyyy",
+                  },
+                };
+
+                switch (interval) {
+                  case "1m":
+                    config.baseInterval = { timeUnit: "minute", count: 1 };
+                    config.groupInterval = { timeUnit: "minute", count: 1 };
+                    config.visiblePoints = 60;
+                    break;
+                  case "2m":
+                    config.baseInterval = { timeUnit: "minute", count: 2 };
+                    config.groupInterval = { timeUnit: "minute", count: 2 };
+                    config.visiblePoints = 50;
+                    break;
+                  case "5m":
+                    config.baseInterval = { timeUnit: "minute", count: 5 };
+                    config.groupInterval = { timeUnit: "minute", count: 5 };
+                    config.visiblePoints = 40;
+                    break;
+                  case "15m":
+                    config.baseInterval = { timeUnit: "minute", count: 15 };
+                    config.groupInterval = { timeUnit: "minute", count: 15 };
+                    config.visiblePoints = 35;
+                    break;
+                  case "30m":
+                    config.baseInterval = { timeUnit: "minute", count: 30 };
+                    config.groupInterval = { timeUnit: "minute", count: 30 };
+                    config.visiblePoints = 30;
+                    break;
+                  case "60m":
+                    config.baseInterval = { timeUnit: "hour", count: 1 };
+                    config.groupInterval = { timeUnit: "hour", count: 1 };
+                    config.visiblePoints = 24;
+                    break;
+                  case "1d":
+                    config.baseInterval = { timeUnit: "day", count: 1 };
+                    config.groupInterval = { timeUnit: "day", count: 1 };
+                    config.visiblePoints = 30;
+                    break;
+                  case "5d":
+                    config.baseInterval = { timeUnit: "day", count: 1 };
+                    config.groupInterval = { timeUnit: "day", count: 1 };
+                    config.visiblePoints = 20;
+                    break;
+                  case "1wk":
+                    config.baseInterval = { timeUnit: "week", count: 1 };
+                    config.groupInterval = { timeUnit: "week", count: 1 };
+                    config.visiblePoints = 15;
+                    break;
+                }
+
+                return config;
+              }
+
+              // Fetch initial data
+              fetchData(defaultInterval)
+                .then((updatedData) => {
+                  updateChart(updatedData, defaultInterval);
+                })
+                .catch((error) => {
+                  console.error("Error fetching initial data:", error);
+                });
+
+              // Set up interval change handler
+              intervalControl.events.on("selected", function (ev) {
+                var interval = ev.item.id;
+                fetchData(interval)
+                  .then((updatedData) => {
+                    updateChart(updatedData, interval);
+                  })
+                  .catch((error) => {
+                    console.error("Error fetching data:", error);
+                  });
+              });
+
+              // Set up series type switcher
               var seriesSwitcher = am5stock.SeriesTypeControl.new(root, {
                 stockChart: stockChart,
               });
@@ -313,170 +555,6 @@
                 }
               }
 
-              // Set up interval control with proper formatting
-              var defaultInterval = "1d"; // Set default interval to 1 day
-              var intervalControl = am5stock.IntervalControl.new(root, {
-                stockChart: stockChart,
-                currentItem: defaultInterval, // Set the default interval
-                intervals: [
-                  {
-                    id: "1m",
-                    label: "1m",
-                    interval: { timeUnit: "minute", count: 1 },
-                  },
-                  {
-                    id: "2m",
-                    label: "2m",
-                    interval: { timeUnit: "minute", count: 2 },
-                  },
-                  {
-                    id: "5m",
-                    label: "5m",
-                    interval: { timeUnit: "minute", count: 5 },
-                  },
-                  {
-                    id: "15m",
-                    label: "15m",
-                    interval: { timeUnit: "minute", count: 15 },
-                  },
-                  {
-                    id: "30m",
-                    label: "30m",
-                    interval: { timeUnit: "minute", count: 30 },
-                  },
-                  {
-                    id: "60m",
-                    label: "1h",
-                    interval: { timeUnit: "hour", count: 1 },
-                  },
-                  {
-                    id: "1d",
-                    label: "1d",
-                    interval: { timeUnit: "day", count: 1 },
-                  },
-                  {
-                    id: "5d",
-                    label: "5d",
-                    interval: { timeUnit: "day", count: 5 },
-                  },
-                  {
-                    id: "1wk",
-                    label: "1w",
-                    interval: { timeUnit: "week", count: 1 },
-                  },
-                  {
-                    id: "1mo",
-                    label: "1M",
-                    interval: { timeUnit: "month", count: 1 },
-                  },
-                ],
-              });
-
-              // Fetch initial data for the default interval
-              fetch(
-                `/update_data/${encodeURIComponent(
-                  "{{ ticker }}"
-                )}/${encodeURIComponent(defaultInterval)}/`
-              )
-                .then((response) => {
-                  if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                  }
-                  return response.json();
-                })
-                .then((data) => {
-                  // Process data and update chart
-                  if (data && data.length > 0) {
-                    var updatedData = data.map(function (item) {
-                      return {
-                        Date: new Date(item.Datetime).getTime(),
-                        Open: item.Open,
-                        High: item.High,
-                        Low: item.Low,
-                        Close: item.Close,
-                        Volume: item.Volume,
-                      };
-                    });
-
-                    // Update series data
-                    valueSeries.data.setAll(updatedData);
-                    volumeSeries.data.setAll(updatedData);
-                    sbSeries.data.setAll(updatedData);
-
-                    // Zoom to the last 30 data points
-                    var lastIndex = updatedData.length - 1;
-                    var startIndex = Math.max(0, lastIndex - 29);
-                    var startDate = updatedData[startIndex].Date;
-                    var endDate = updatedData[lastIndex].Date;
-                    dateAxis.zoomToDates(
-                      new Date(startDate),
-                      new Date(endDate)
-                    );
-                  }
-                })
-                .catch((error) => {
-                  console.error("Error fetching initial data:", error);
-                });
-
-              // Set up data updating on interval change
-              intervalControl.events.on("selected", function (ev) {
-                var interval = ev.item.id;
-
-                // Update x-axis base interval
-                var timeUnit = ev.item.interval.timeUnit;
-                var count = ev.item.interval.count;
-
-                dateAxis.set("baseInterval", {
-                  timeUnit: timeUnit,
-                  count: count,
-                });
-
-                // Fetch updated data
-                fetch(
-                  `/update_data/${encodeURIComponent(
-                    "{{ ticker }}"
-                  )}/${encodeURIComponent(interval)}/`
-                )
-                  .then((response) => {
-                    if (!response.ok) {
-                      throw new Error("Network response was not ok");
-                    }
-                    return response.json();
-                  })
-                  .then((data) => {
-                    if (data && data.length > 0) {
-                      var updatedData = data.map(function (item) {
-                        return {
-                          Date: new Date(item.Datetime).getTime(),
-                          Open: item.Open,
-                          High: item.High,
-                          Low: item.Low,
-                          Close: item.Close,
-                          Volume: item.Volume,
-                        };
-                      });
-
-                      // Update series data
-                      valueSeries.data.setAll(updatedData);
-                      volumeSeries.data.setAll(updatedData);
-                      sbSeries.data.setAll(updatedData);
-
-                      // Zoom to the last 30 data points
-                      var lastIndex = updatedData.length - 1;
-                      var startIndex = Math.max(0, lastIndex - 29);
-                      var startDate = updatedData[startIndex].Date;
-                      var endDate = updatedData[lastIndex].Date;
-                      dateAxis.zoomToDates(
-                        new Date(startDate),
-                        new Date(endDate)
-                      );
-                    }
-                  })
-                  .catch((error) => {
-                    console.error("Error fetching data:", error);
-                  });
-              });
-
               // Add toolbar
               var toolbar = am5stock.StockToolbar.new(root, {
                 container: document.getElementById("chartcontrols"),
@@ -487,13 +565,10 @@
                     stockChart: stockChart,
                     legend: valueLegend,
                   }),
-                  seriesSwitcher,
-                  am5stock.SeriesTypeControl.new(root, {
-                    stockChart: stockChart,
-                  }),
                   am5stock.DrawingControl.new(root, {
                     stockChart: stockChart,
                   }),
+                  seriesSwitcher,
                   am5stock.ResetControl.new(root, {
                     stockChart: stockChart,
                   }),

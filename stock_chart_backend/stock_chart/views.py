@@ -20,36 +20,44 @@ tickers = [
 def home(request):
     return redirect("stock_chart:display_ticker", "RELIANCE.NS")
 
-def retrieve_data(ticker, interval='1d', period='1mo'):
+def retrieve_data(ticker, interval='1d'):
     """
     Retrieve stock data using yfinance with proper interval and period handling
     """
     try:
         ticker_obj = yf.Ticker(ticker)
         
+        # Clean up the interval string
+        interval = interval.lower().replace(' ', '').replace('minute', 'm').replace('hour', 'h').replace('day', 'd').replace('week', 'wk').replace('  month', 'mo').replace('year', 'y')
+        print(f"Received interval: {interval}")
+
+        # Updated interval mapping with proper periods
         interval_map = {
-            '1m': '1m', '2m': '2m', '5m': '5m', '15m': '15m',
-            '30m': '30m', '60m': '1h', '90m': '1h', 
-            '1d': '1d', '5d': '5d', '1wk': '1wk', '1mo': '1mo',
-            '3mo': '3mo'
+            '1m': ('1m', '5d'),    
+            '2m': ('2m', '5d'),    
+            '5m': ('5m', '5d'),   
+            '15m': ('15m', '5d'),  # 15 minute data for 7 days
+            '30m': ('30m', '5d'),  # 30 minute data for 7 days
+            '60m': ('1h', '5d'),   # 1 hour data for 7 days
+            '1h': ('1h', '1mo'),
+            '1d': ('1d', '1mo'),   # Daily data for 1 month
+            '5d': ('5d', '3mo'),   # 5-day data for 3 months
+            '1wk': ('1wk', '1y'),  # Weekly data for 1 year
+            '1mo': ('1mo', '5y'),  # Monthly data for 5 years
+            '1y': ('1y', 'max')  # 3-month data for max period
         }
         
-        valid_interval = interval_map.get(interval, '1d')
+        # Get interval and period from mapping
+        if interval in interval_map:
+            valid_interval, period = interval_map[interval]
+        else:
+            valid_interval, period = '1d', '1mo'  # Default values
+            
+        print(f"Mapped interval: {valid_interval}, Period: {period}")
         
-        # Adjust period based on interval
-        if valid_interval in ['1m', '2m', '5m', '15m', '30m', '1h']:
-            period = '1d'
-        elif valid_interval == '1d':
-            period = '1mo'
-        elif valid_interval in ['5d', '1wk']:
-            period = '3mo'
-        elif valid_interval == '1mo':
-            period = '1y'
-        elif valid_interval == '3mo':
-            period = '2y'
-        
+        # Fetch historical data with proper interval and period
         hist_df = ticker_obj.history(interval=valid_interval, period=period)
-        print (hist_df, interval, valid_interval, valid_interval)
+        print(f"Data retrieved: {hist_df.shape[0]} rows, Interval: {interval}, Valid Interval: {valid_interval}, Period: {period}")
         
         if hist_df.empty:
             print(f"No data found for ticker: {ticker}")
@@ -84,7 +92,6 @@ def display_ticker(request, ticker):
         })
 
     hist_data = hist_df[['Datetime', 'Open', 'High', 'Low', 'Close', 'Volume']].to_json(orient="records")
-      # Debugging line to check the data format
 
     return render(request, "dashboard/main.html", {
         "tickers": zip(tickers, [yf.Ticker(tkr).info['longName'] for tkr in tickers]),
