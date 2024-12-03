@@ -76,9 +76,10 @@ USE_I18N = True
 
 USE_TZ = True
 
+# Add to your settings.py
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Adjust this if your static files are in a different location
+    BASE_DIR / "stock_chart/static",
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
