@@ -1,0 +1,88 @@
+/* Watchlist specific styles */
+.watchlist-sidebar {
+  width: 300px;
+  background-color: var(--watchlist-bg);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.watchlist-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+#add-symbol-form {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+}
+
+#symbol-input {
+  flex: 1;
+  background: var(--main-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.watchlist-items {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.watchlist-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.watchlist-table th,
+.watchlist-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.watchlist-table th {
+  font-weight: bold;
+  background-color: var(--watchlist-bg);
+}
+
+.watchlist-item {
+  cursor: pointer;
+}
+
+.watchlist-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.delete-btn {
+  visibility: hidden;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: 8px;
+  font-size: 16px;
+}
+
+.watchlist-item:hover .delete-btn {
+  visibility: visible;
+}
+
+.positive {
+  color: var(--positive-color);
+}
+
+.negative {
+  color: var(--negative-color);
+}
+
+.error {
+  color: #721c24;
+  background-color: #f8d7da;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+}
