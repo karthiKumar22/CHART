@@ -13,11 +13,19 @@
     <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/base.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/watchlist.css' %}" />
     <link rel="stylesheet" href="{% static 'css/chart.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/Watchlist.css' %}" />
 </head>
 <body>
     <div class="layout-container">
+        <!-- Stock Search Bar -->
+        <div class="search-container">
+            <div class="search-wrapper">
+                <input type="text" id="stock-search" placeholder="Search stocks..." autocomplete="off" />
+                <div id="search-results" class="search-results"></div>
+            </div>
+        </div>
+
         <!-- Watchlist Sidebar -->
         <div class="watchlist-sidebar">
             <div class="watchlist-header">
@@ -66,10 +74,12 @@
     <script type="module" src="{% static 'js/main.js' %}"></script>
     <script type="module">
         import initChart from "{% static 'js/chart-init.js' %}";
+        import { initStockSearch } from "{% static 'js/stock-search.js' %}";
         
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof am5 !== 'undefined') {
                 initChart("{{ ticker }}", JSON.parse("{{ hist_data|escapejs }}"));
+                initStockSearch();
             } else {
                 console.error('amCharts library not loaded');
             }
@@ -77,3 +87,4 @@
     </script>
 </body>
 </html>
+

@@ -22,3 +22,4 @@ def get_interval_config(interval: str) -> Tuple[str, str]:
 def clean_interval_string(interval: str) -> str:
     """Clean and standardize interval string."""
     return interval.lower().replace(' ', '').replace('minute', 'm').replace('hour', 'h').replace('day', 'd').replace('week', 'wk').replace('month', 'mo')
+

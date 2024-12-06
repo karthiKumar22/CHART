@@ -1,18 +1,4 @@
 /* Chart specific styles */
-
-@media (max-width: 768px) {
-  #chartdiv {
-    height: 300px; /* Adjust height for smaller screens */
-  }
-  .stock-info h1 {
-    font-size: 1.2em;
-  }
-
-  .stock-info .details {
-    flex-direction: column;
-    gap: 8px;
-  }
-}
 .main-content {
   flex: 1;
   display: flex;

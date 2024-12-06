@@ -1,20 +1,62 @@
+import csv
+import os
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.core.cache import cache
+from nselib import capital_market
 import yfinance as yf
 import pandas as pd
 from datetime import datetime, timedelta
 import json
+from .utils.intervals import get_interval_config 
+import logging
+
+logger = logging.getLogger(__name__)
 
 def home(request):
     return redirect("stock_chart:display_ticker", ticker="RELIANCE")
 
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .utils.intervals import get_interval_config
-import yfinance as yf
-import pandas as pd
+EQUITY_LIST_PATH = os.path.join('stock_chart', 'static', 'data', 'equity_list.csv')
+
+def search_stocks(request):
+    """
+    View to search stocks by symbol (autocomplete) from the equity list.
+    """
+    if request.method == "GET":
+        query = request.GET.get("q", "").strip().upper()  # Convert to uppercase for case-insensitive matching
+        if not query:
+            return JsonResponse({"stocks": []}, status=200)
+
+        try:
+            with open(EQUITY_LIST_PATH, newline='', encoding='utf-8-sig') as csvfile:
+                # Use the pipe delimiter
+                reader = csv.DictReader(csvfile, delimiter='|')
+                
+                # Normalize column names to remove extra spaces
+                normalized_columns = {key.strip(): key for key in reader.fieldnames}
+
+                # Filter stocks by matching the first word of SYMBOL (case-insensitive)
+                results = [
+                    {
+                        "symbol": row[normalized_columns["SYMBOL"]],
+                        "name": row[normalized_columns["NAME OF COMPANY"]],
+                    }
+                    for row in reader
+                    if query in row[normalized_columns["SYMBOL"]].split()[0].upper()  # Compare with the first word of SYMBOL
+                ]
+
+                return JsonResponse({"stocks": results}, status=200)
+
+        except FileNotFoundError:
+            logger.error("Equity list CSV file not found at %s", EQUITY_LIST_PATH)
+            return JsonResponse({"error": "Equity list not found."}, status=404)
+        except KeyError as e:
+            logger.error("CSV column error: %s", e)
+            return JsonResponse({"error": f"Missing column in CSV: {e}"}, status=500)
+        except Exception as e:
+            logger.exception("Unexpected error in search_stocks:")
+            return JsonResponse({"error": "Internal server error"}, status=500)
 
 def retrieve_data(ticker, interval='1d'):
     try:
@@ -160,8 +202,6 @@ def update_watchlist_data(request):
             })
     
     return JsonResponse({'status': 'success', 'watchlist': updated_watchlist})
-
-
 
 def update_data(request, ticker, interval):
     hist_df, _ = retrieve_data(ticker, interval)
